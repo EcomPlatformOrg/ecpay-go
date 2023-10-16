@@ -12,7 +12,7 @@ type ECPayClient struct {
 	Client     *http.Client `json:"Client"`
 }
 
-// NewECPayClient 初始化一個新的 ECPayClient
+// 初始化新的 ECPayClient
 func NewECPayClient(baseURL, merchantID, hashKey, hashIV string) *ECPayClient {
 	return &ECPayClient{
 		BaseURL:    baseURL,

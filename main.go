@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-
+	//訂單範例
 	orderData := models.Order{
 		ID:          1676530197384,
 		TotalAmount: 999,

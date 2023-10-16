@@ -17,7 +17,7 @@ import (
 type Parameter map[string]string
 
 func CreateOrder(orderData models.Order) error {
-
+	//特店測試環境
 	initClient := &client.ECPayClient{
 		BaseURL:    "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5",
 		MerchantID: "3002607",
@@ -26,9 +26,8 @@ func CreateOrder(orderData models.Order) error {
 	}
 
 	initPara := Parameter{
-		"MerchantID":      initClient.MerchantID,
-		"MerchantTradeNo": "test" + strconv.Itoa(orderData.ID),
-		// "MerchantTradeDate": time.Now().Format("2006/01/02 15:04:05"),
+		"MerchantID":        initClient.MerchantID,
+		"MerchantTradeNo":   "test" + strconv.Itoa(orderData.ID),
 		"MerchantTradeDate": "2023/09/25 00:00:00",
 		"PaymentType":       "aio",
 		"TotalAmount":       strconv.Itoa(orderData.TotalAmount),
@@ -105,8 +104,6 @@ func GenerateCheckValue(client *client.ECPayClient, initPara map[string]string) 
 		initformData += keys[i] + "=" + initPara[keys[i]] + "&"
 	}
 	initformData = strings.TrimSuffix(initformData, "&")
-	// fmt.Println("initformData:", initformData)
-	// initformDataString := initformData.Encode()
 
 	//加上HashKey、HashIV
 	finalPara := "HashKey=" + client.HashKey + "&" + initformData + "&" + "HashIV=" + client.HashIV
@@ -118,8 +115,8 @@ func GenerateCheckValue(client *client.ECPayClient, initPara map[string]string) 
 
 	//轉為小寫
 	initformData = strings.ToLower(initformData)
-	//SHA256加密
 
+	//SHA256加密
 	hash := sha256.Sum256([]byte(initformData))
 	encodedHash := fmt.Sprintf("%x", hash)
 

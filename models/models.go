@@ -31,6 +31,7 @@ type Parameters struct {
 	Language          string //ENG KOR JPN CHI
 }
 
+// go-ecom-monolithic-models
 type Order struct {
 	ID                int               `json:"id"`                  // ID Unique identifier for the order
 	UserID            string            `json:"user_id"`             // UserID of the user who placed the order
