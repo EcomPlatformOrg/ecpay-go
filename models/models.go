@@ -2,7 +2,6 @@ package models
 
 import "time"
 
-// map[string]interface{}
 type Parameters struct {
 	MerchantID        string
 	MerchantTradeNo   string
