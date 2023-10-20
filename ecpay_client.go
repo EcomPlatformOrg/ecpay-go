@@ -1,4 +1,4 @@
-package main
+package ecpayGo
 
 type ECPayClient struct {
 	BaseURL string `json:"BaseURL"`

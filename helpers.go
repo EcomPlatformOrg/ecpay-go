@@ -1,4 +1,4 @@
-package main
+package ecpayGo
 
 import (
 	"crypto/sha256"
