@@ -34,8 +34,29 @@
 - **MerchantID**: 特店編號
 - **MerchantTradeNo**: 特店訂單編號
 - **MerchantTradeDate**: 特店交易時間
-- **PaymentType**: 交易類型
-  ... [其他欄位]
+- **PaymentType**: 交易類型 固定為aio
+- **TotalAmount**: 交易金額
+- **TradeDesc**: 交易描述
+- **ItemName**: 商品名稱 (多項商品時以#分隔)
+- **ReturnURL**: 付款完成通知回傳網址
+- **ChoosePayment**: 選擇預設付款方式
+- **ClientBackURL**: Client 端回傳網址
+- **CheckMacValue**: 檢查碼
+- **EncryptType**: CheckMacValue 加密類型
+- **StoreID**: 合作特店商店代碼
+- **ItemURL**: 商品銷售網址
+- **Remark**: 備註欄位
+- **ChooseSubPayment**: 選擇預設付款子項目
+- **OrderResultURL**: Client 端回傳付款結果網址
+- **NeedExtraPaidInfo**: 是否需要額外的付款資訊
+- **IgnorePayment**: 隱藏付款方式
+- **PlatformID**: 特約合作平台商代號
+- **CustomField1**: 自訂名稱欄位 1
+- **CustomField2**: 自訂名稱欄位 2
+- **CustomField3**: 自訂名稱欄位 3
+- **CustomField4**: 自訂名稱欄位 4
+- **Language**: 語系
+  
 
 ## 2. 方法說明
 
