@@ -88,7 +88,6 @@ func CreateOrder(orderData models.Order) error {
 		}
 	}
 	return nil
-
 }
 
 func GenerateCheckValue(client *client.ECPayClient, initPara map[string]string) (CheckMacValue string) {
