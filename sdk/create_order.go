@@ -1,4 +1,5 @@
-//package sdk
+package sdk
+
 //
 //import (
 //	"crypto/sha256"
