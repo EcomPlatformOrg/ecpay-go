@@ -86,7 +86,7 @@ type ECPayTrade struct {
 }
 
 // CreateAioPayment 建立ECPay交易 (AIO)
-func (e *ECPayTrade) CreateAioPayment(client ECPayClient) error {
+func (e *ECPayTrade) CreateAioPayment(client ECPayClient) (string, error) {
 
 	formData := tradeToFormValues(e)
 
@@ -98,7 +98,12 @@ func (e *ECPayTrade) CreateAioPayment(client ECPayClient) error {
 	resp, err := http.PostForm(client.BaseURL, formData)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
-		return err
+		return "", err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -107,5 +112,5 @@ func (e *ECPayTrade) CreateAioPayment(client ECPayClient) error {
 		}
 	}(resp.Body)
 
-	return nil
+	return string(body), nil
 }
