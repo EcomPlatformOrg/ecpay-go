@@ -76,9 +76,6 @@ func tradeToFormValues(trade *ECPayTrade) url.Values {
 // generateCheckMacValue generates CheckMacValue
 func generateCheckMacValue(values url.Values, hashKey string, hashIV string) string {
 
-	slog.Info(fmt.Sprintf("generateCheckMacValue values: %v", values))
-	slog.Info(fmt.Sprintf("generateCheckMacValue hashKey: %v", hashKey))
-	slog.Info(fmt.Sprintf("generateCheckMacValue hashIV: %v", hashIV))
 	// Step (1) 將傳遞參數依照第一個英文字母，由A到Z的順序來排序
 	slog.Info(fmt.Sprintf("Step (1) values: %v", values))
 	keys := make([]string, 0, len(values))
