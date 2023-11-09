@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"log/slog"
 	"net/url"
 	"sort"
 	"strconv"
@@ -73,12 +75,18 @@ func tradeToFormValues(trade *ECPayTrade) url.Values {
 
 // generateCheckMacValue generates CheckMacValue
 func generateCheckMacValue(values url.Values, hashKey string, hashIV string) string {
+
+	slog.Info(fmt.Sprintf("generateCheckMacValue values: %v", values))
+	slog.Info(fmt.Sprintf("generateCheckMacValue hashKey: %v", hashKey))
+	slog.Info(fmt.Sprintf("generateCheckMacValue hashIV: %v", hashIV))
 	// Step (1) 將傳遞參數依照第一個英文字母，由A到Z的順序來排序
+	slog.Info(fmt.Sprintf("Step (1) values: %v", values))
 	keys := make([]string, 0, len(values))
 	for key := range values {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
+	slog.Info(fmt.Sprintf("keys: %v", keys))
 
 	var sortedQueryString string
 	for _, key := range keys {
@@ -86,22 +94,28 @@ func generateCheckMacValue(values url.Values, hashKey string, hashIV string) str
 	}
 	// remove trailing '&'
 	sortedQueryString = strings.TrimSuffix(sortedQueryString, "&")
+	slog.Info(fmt.Sprintf("sortedQueryString: %v", sortedQueryString))
 
 	// Step (2) 參數最前面加上HashKey、最後面加上HashIV
 	encodedString := hashKey + "&" + sortedQueryString + "&" + hashIV
+	slog.Info(fmt.Sprintf("Step (2) encodedString: %v", encodedString))
 
 	// Step (3) 將整串字串進行URL encode
 	encodedString = url.QueryEscape(encodedString)
+	slog.Info(fmt.Sprintf("Step (3) encodedString: %v", encodedString))
 
 	// Step (4) 轉為小寫
 	encodedString = strings.ToLower(encodedString)
+	slog.Info(fmt.Sprintf("Step (4) encodedString: %v", encodedString))
 
 	// Step (5) 以SHA256加密方式來產生雜凑值
 	hasher := sha256.New()
 	hasher.Write([]byte(encodedString))
 	hashedValue := hex.EncodeToString(hasher.Sum(nil))
+	slog.Info(fmt.Sprintf("Step (5) hashedValue: %v", hashedValue))
 
 	// Step (6) 再轉大寫產生CheckMacValue
+	slog.Info(fmt.Sprintf("Step (6) CheckMacValue: %v", strings.ToUpper(hashedValue)))
 	return strings.ToUpper(hashedValue)
 }
 
