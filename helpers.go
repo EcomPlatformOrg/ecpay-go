@@ -1,4 +1,4 @@
-package ecpayGo
+package ECpay_go
 
 import (
 	"crypto/sha256"
@@ -69,6 +69,47 @@ func tradeToFormValues(trade *ECPayTrade) url.Values {
 	if trade.Language != "" {
 		formData.Set("Language", trade.Language)
 	}
+
+	return formData
+}
+
+// logisticsToFormValues 將 ECPayLogistics 結構體轉換為 url.Values。
+func logisticsToFormValues(logistics *ECPayLogistics) url.Values {
+	formData := url.Values{}
+
+	// 將 ECPayLogistics 結構體中的所有字段添加到 formData 中
+	formData.Set("MerchantID", logistics.MerchantID)
+	formData.Set("MerchantTradeNo", logistics.MerchantTradeNo)
+	formData.Set("MerchantTradeDate", logistics.MerchantTradeDate)
+	formData.Set("LogisticsType", logistics.LogisticsType)
+	formData.Set("LogisticsSubType", logistics.LogisticsSubType)
+	formData.Set("GoodsAmount", strconv.Itoa(logistics.GoodsAmount))
+	formData.Set("CollectionAmount", strconv.Itoa(logistics.CollectionAmount))
+	formData.Set("IsCollection", logistics.IsCollection)
+	formData.Set("GoodsName", logistics.GoodsName)
+	formData.Set("SenderName", logistics.SenderName)
+	formData.Set("SenderPhone", logistics.SenderPhone)
+	formData.Set("SenderCellPhone", logistics.SenderCellPhone)
+	formData.Set("ReceiverName", logistics.ReceiverName)
+	formData.Set("ReceiverPhone", logistics.ReceiverPhone)
+	formData.Set("ReceiverCellPhone", logistics.ReceiverCellPhone)
+	formData.Set("ReceiverEmail", logistics.ReceiverEmail)
+	formData.Set("ReceiverStoreID", logistics.ReceiverStoreID)
+	formData.Set("ReturnStoreID", logistics.ReturnStoreID)
+	formData.Set("TradeDesc", logistics.TradeDesc)
+	formData.Set("ServerReplyURL", logistics.ServerReplyURL)
+	formData.Set("ClientReplyURL", logistics.ClientReplyURL)
+	formData.Set("Remark", logistics.Remark)
+	formData.Set("PlatformID", logistics.PlatformID)
+	formData.Set("CheckMacValue", logistics.CheckMacValue)
+	formData.Set("RtnCode", logistics.RtnCode)
+	formData.Set("RtnMsg", logistics.RtnMsg)
+	formData.Set("AllPayLogisticsID", logistics.AllPayLogisticsID)
+	formData.Set("UpdateStatusDate", logistics.UpdateStatusDate)
+	formData.Set("ReceiverAddress", logistics.ReceiverAddress)
+	formData.Set("CVSPaymentNo", logistics.CVSPaymentNo)
+	formData.Set("CVSValidationNo", logistics.CVSValidationNo)
+	formData.Set("BookingNote", logistics.BookingNote)
 
 	return formData
 }

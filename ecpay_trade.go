@@ -1,4 +1,4 @@
-package ecpayGo
+package ECpay_go
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// ECPayTrade ECPay交易資料
+// ECPayTrade is a struct containing information for an ECPay trade
 type ECPayTrade struct {
 	// MerchantID 特店編號
 	MerchantID string `json:"MerchantID"`
@@ -85,7 +85,9 @@ type ECPayTrade struct {
 	Language string `json:"Language,omitempty"`
 }
 
-// CreateAioPayment 建立ECPay交易 (AIO)
+// CreateAioPayment sends an HTTP POST request to create a payment transaction with AioPayment method.
+// It takes an ECPayClient as a parameter and returns the response body as a string and an error, if any.
+// If an error occurs during the request, it will be returned.
 func (e *ECPayTrade) CreateAioPayment(client ECPayClient) (string, error) {
 
 	formData := tradeToFormValues(e)
