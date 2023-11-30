@@ -132,42 +132,40 @@ func ReflectFormValues(data any) url.Values {
 			continue
 		}
 
-		var value string
 		switch field.Kind() {
 		case reflect.String:
 			strVal := field.String()
 			if strVal != "" {
-				value = strVal
+				values.Set(tag, strVal)
 			}
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			if field.Int() != 0 {
-				value = strconv.FormatInt(field.Int(), 10)
+				values.Set(tag, strconv.FormatInt(field.Int(), 10))
 			}
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			if field.Uint() != 0 {
-				value = strconv.FormatUint(field.Uint(), 10)
+				values.Set(tag, strconv.FormatUint(field.Uint(), 10))
 			}
 		case reflect.Float32, reflect.Float64:
 			if field.Float() != 0.0 {
-				value = strconv.FormatFloat(field.Float(), 'f', -1, 64)
+				values.Set(tag, strconv.FormatFloat(field.Float(), 'f', -1, 64))
 			}
 		case reflect.Bool:
-			value = strconv.FormatBool(field.Bool())
+			values.Set(tag, strconv.FormatBool(field.Bool()))
 		case reflect.Struct:
 			if field.Type() == reflect.TypeOf(time.Time{}) {
 				t := field.Interface().(time.Time)
 				if !t.IsZero() {
-					value = t.Format(time.RFC3339)
+					values.Set(tag, t.Format(time.RFC3339))
 				}
 			}
 		case reflect.Ptr:
 			if !field.IsNil() {
-				value = fmt.Sprintf("%v", field.Elem().Interface())
+				values.Set(tag, fmt.Sprintf("%v", field.Elem().Interface()))
 			}
 		default:
 			slog.Error(fmt.Sprintf("Unsupported type: %v", field.Kind()))
 		}
-		values.Set(tag, value)
 	}
 
 	return values
