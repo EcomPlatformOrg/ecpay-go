@@ -2,8 +2,8 @@ package trade
 
 import (
 	"fmt"
-	"github.com/EcomPlatformOrg/ECpay-go/internal/client"
-	"github.com/EcomPlatformOrg/ECpay-go/internal/helpers"
+	"github.com/EcomPlatformOrg/ECpay-go/pkg/client"
+	"github.com/EcomPlatformOrg/ECpay-go/pkg/helpers"
 	"io"
 	"log/slog"
 	"net/http"
