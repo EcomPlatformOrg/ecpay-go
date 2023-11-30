@@ -3,7 +3,6 @@ package helpers
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"github.com/EcomPlatformOrg/ECpay-go/pkg/logistics/express"
 	"github.com/EcomPlatformOrg/ECpay-go/pkg/trade"
@@ -118,70 +117,6 @@ func LogisticsToFormValues(logistics *express.ECPayLogistics) url.Values {
 	return formData
 }
 
-// GenerateCheckMacValue generates CheckMacValue
-func GenerateCheckMacValue(values url.Values, hashKey string, hashIV string) string {
-
-	// Step (1) 將傳遞參數依照第一個英文字母，由A到Z的順序來排序
-	slog.Info(fmt.Sprintf("Step (1) values: %v", values))
-	keys := make([]string, 0, len(values))
-	for key := range values {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	slog.Info(fmt.Sprintf("keys: %v", keys))
-
-	var sortedQueryString string
-	for _, key := range keys {
-		sortedQueryString += key + "=" + values.Get(key) + "&"
-	}
-	// remove trailing '&'
-	sortedQueryString = strings.TrimSuffix(sortedQueryString, "&")
-	slog.Info(fmt.Sprintf("sortedQueryString: %v", sortedQueryString))
-
-	// Step (2) 參數最前面加上HashKey、最後面加上HashIV
-	encodedString := "HashKey=" + hashKey + "&" + sortedQueryString + "&HashIV=" + hashIV
-	slog.Info(fmt.Sprintf("Step (2) encodedString: %v", encodedString))
-
-	// Step (3) 將整串字串進行URL encode
-	encodedString = url.QueryEscape(encodedString)
-	slog.Info(fmt.Sprintf("Step (3) encodedString: %v", encodedString))
-
-	// Step (4) 轉為小寫
-	encodedString = strings.ToLower(encodedString)
-	slog.Info(fmt.Sprintf("Step (4) encodedString: %v", encodedString))
-
-	// Step (5) 以SHA256加密方式來產生雜凑值
-	hasher := sha256.New()
-	hasher.Write([]byte(encodedString))
-	hashedValue := hex.EncodeToString(hasher.Sum(nil))
-	slog.Info(fmt.Sprintf("Step (5) hashedValue: %v", hashedValue))
-
-	// Step (6) 再轉大寫產生CheckMacValue
-	slog.Info(fmt.Sprintf("Step (6) CheckMacValue: %v", strings.ToUpper(hashedValue)))
-	return strings.ToUpper(hashedValue)
-}
-
-// ValidateCheckMacValue validates the CheckMacValue from ECPay's response
-func ValidateCheckMacValue(responseValues url.Values, hashKey string, hashIV string) error {
-	// Extract the CheckMacValue from the response
-	receivedCheckMacValue := responseValues.Get("CheckMacValue")
-	if receivedCheckMacValue == "" {
-		return errors.New("CheckMacValue is missing from the response")
-	}
-
-	// Remove the CheckMacValue from the values as it's not included in the generation
-	responseValues.Del("CheckMacValue")
-
-	// Generate the CheckMacValue using the provided values
-	expectedCheckMacValue := GenerateCheckMacValue(responseValues, hashKey, hashIV)
-
-	if expectedCheckMacValue != receivedCheckMacValue {
-		return errors.New("CheckMacValue mismatch")
-	}
-
-	return nil
-}
-
 func ReflectFormValues(data any) url.Values {
 
 	values := url.Values{}
@@ -234,4 +169,47 @@ func ReflectFormValues(data any) url.Values {
 	}
 
 	return values
+}
+
+// GenerateCheckMacValue generates CheckMacValue
+func GenerateCheckMacValue(values url.Values, hashKey string, hashIV string) string {
+
+	// Step (1) 將傳遞參數依照第一個英文字母，由A到Z的順序來排序
+	slog.Info(fmt.Sprintf("Step (1) values: %v", values))
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	slog.Info(fmt.Sprintf("keys: %v", keys))
+
+	var sortedQueryString string
+	for _, key := range keys {
+		sortedQueryString += key + "=" + values.Get(key) + "&"
+	}
+	// remove trailing '&'
+	sortedQueryString = strings.TrimSuffix(sortedQueryString, "&")
+	slog.Info(fmt.Sprintf("sortedQueryString: %v", sortedQueryString))
+
+	// Step (2) 參數最前面加上HashKey、最後面加上HashIV
+	encodedString := "HashKey=" + hashKey + "&" + sortedQueryString + "&HashIV=" + hashIV
+	slog.Info(fmt.Sprintf("Step (2) encodedString: %v", encodedString))
+
+	// Step (3) 將整串字串進行URL encode
+	encodedString = url.QueryEscape(encodedString)
+	slog.Info(fmt.Sprintf("Step (3) encodedString: %v", encodedString))
+
+	// Step (4) 轉為小寫
+	encodedString = strings.ToLower(encodedString)
+	slog.Info(fmt.Sprintf("Step (4) encodedString: %v", encodedString))
+
+	// Step (5) 以SHA256加密方式來產生雜凑值
+	hasher := sha256.New()
+	hasher.Write([]byte(encodedString))
+	hashedValue := hex.EncodeToString(hasher.Sum(nil))
+	slog.Info(fmt.Sprintf("Step (5) hashedValue: %v", hashedValue))
+
+	// Step (6) 再轉大寫產生CheckMacValue
+	slog.Info(fmt.Sprintf("Step (6) CheckMacValue: %v", strings.ToUpper(hashedValue)))
+	return strings.ToUpper(hashedValue)
 }
