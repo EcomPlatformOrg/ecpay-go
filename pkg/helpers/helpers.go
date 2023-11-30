@@ -120,6 +120,10 @@ func ReflectFormValues(data any) url.Values {
 	values := url.Values{}
 	v := reflect.ValueOf(data)
 
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
 		tag := v.Type().Field(i).Tag.Get("form")
