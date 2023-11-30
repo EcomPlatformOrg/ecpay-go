@@ -113,7 +113,27 @@ type ECPayLogistics struct {
 // Map is a function that maps the ECPayLogistics struct to the ECPayClient struct
 func (e *ECPayLogistics) Map(c client.ECPayClient) (string, error) {
 
-	return "", nil
+	formData := helpers.ReflectFormValues(e)
+
+	// 發送 HTTP POST 請求
+	resp, err := http.PostForm(c.BaseURL, formData)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
+		return "", err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	defer func(Body io.ReadCloser) {
+		if err = Body.Close(); err != nil {
+			slog.Error(err.Error())
+		}
+	}(resp.Body)
+
+	return string(body), nil
 }
 
 // CreateExpress 綠界物流門市訂單建立

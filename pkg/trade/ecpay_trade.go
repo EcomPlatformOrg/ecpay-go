@@ -98,8 +98,6 @@ func (e *ECPayTrade) CreateAioPayment(client client.ECPayClient) (string, error)
 
 	formData.Set("CheckMacValue", checkMacValue)
 
-	slog.Info(fmt.Sprintf("%v", formData))
-
 	// 發送 HTTP POST 請求
 	resp, err := http.PostForm(client.BaseURL, formData)
 	if err != nil {
