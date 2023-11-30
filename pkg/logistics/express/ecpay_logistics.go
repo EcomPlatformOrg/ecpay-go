@@ -119,7 +119,7 @@ func (e *ECPayLogistics) Map(c client.ECPayClient) (string, error) {
 // CreateExpress 綠界物流門市訂單建立
 func (e *ECPayLogistics) CreateExpress(c client.ECPayClient) error {
 
-	formData := helpers.LogisticsToFormValues(e)
+	formData := helpers.ReflectFormValues(e)
 
 	checkMacValue := helpers.GenerateCheckMacValue(formData, c.HashKey, c.HashIV)
 	formData.Set("CheckMacValue", checkMacValue)
