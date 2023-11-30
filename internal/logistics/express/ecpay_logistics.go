@@ -111,8 +111,9 @@ type ECPayLogistics struct {
 }
 
 // Map is a function that maps the ECPayLogistics struct to the ECPayClient struct
-func (e *ECPayLogistics) Map(c client.ECPayClient) {
+func (e *ECPayLogistics) Map(c client.ECPayClient) (string, error) {
 
+	return "", nil
 }
 
 // CreateExpress 綠界物流門市訂單建立
