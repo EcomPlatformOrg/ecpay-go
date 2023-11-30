@@ -1,19 +1,23 @@
-package ECpay_go
+package helpers
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/EcomPlatformOrg/ECpay-go/internal/logistics/express"
+	"github.com/EcomPlatformOrg/ECpay-go/internal/trade"
+	"github.com/goccy/go-reflect"
 	"log/slog"
 	"net/url"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
-// tradeToFormValues converts ECPayTrade to url.Values
-func tradeToFormValues(trade *ECPayTrade) url.Values {
+// TradeToFormValues converts ECPayTrade to url.Values
+func TradeToFormValues(trade *trade.ECPayTrade) url.Values {
 
 	formData := url.Values{}
 	formData.Set("MerchantID", trade.MerchantID)
@@ -73,8 +77,8 @@ func tradeToFormValues(trade *ECPayTrade) url.Values {
 	return formData
 }
 
-// logisticsToFormValues 將 ECPayLogistics 結構體轉換為 url.Values。
-func logisticsToFormValues(logistics *ECPayLogistics) url.Values {
+// LogisticsToFormValues 將 ECPayLogistics 結構體轉換為 url.Values。
+func LogisticsToFormValues(logistics *express.ECPayLogistics) url.Values {
 	formData := url.Values{}
 
 	// 將 ECPayLogistics 結構體中的所有字段添加到 formData 中
@@ -114,8 +118,8 @@ func logisticsToFormValues(logistics *ECPayLogistics) url.Values {
 	return formData
 }
 
-// generateCheckMacValue generates CheckMacValue
-func generateCheckMacValue(values url.Values, hashKey string, hashIV string) string {
+// GenerateCheckMacValue generates CheckMacValue
+func GenerateCheckMacValue(values url.Values, hashKey string, hashIV string) string {
 
 	// Step (1) 將傳遞參數依照第一個英文字母，由A到Z的順序來排序
 	slog.Info(fmt.Sprintf("Step (1) values: %v", values))
@@ -169,11 +173,65 @@ func ValidateCheckMacValue(responseValues url.Values, hashKey string, hashIV str
 	responseValues.Del("CheckMacValue")
 
 	// Generate the CheckMacValue using the provided values
-	expectedCheckMacValue := generateCheckMacValue(responseValues, hashKey, hashIV)
+	expectedCheckMacValue := GenerateCheckMacValue(responseValues, hashKey, hashIV)
 
 	if expectedCheckMacValue != receivedCheckMacValue {
 		return errors.New("CheckMacValue mismatch")
 	}
 
 	return nil
+}
+
+func ReflectFormValues(data any) url.Values {
+
+	values := url.Values{}
+	v := reflect.ValueOf(data)
+
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		tag := v.Type().Field(i).Tag.Get("form")
+
+		if tag == "" || !field.IsValid() {
+			continue
+		}
+
+		var value string
+		switch field.Kind() {
+		case reflect.String:
+			strVal := field.String()
+			if strVal != "" {
+				value = strVal
+			}
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			if field.Int() != 0 {
+				value = strconv.FormatInt(field.Int(), 10)
+			}
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			if field.Uint() != 0 {
+				value = strconv.FormatUint(field.Uint(), 10)
+			}
+		case reflect.Float32, reflect.Float64:
+			if field.Float() != 0.0 {
+				value = strconv.FormatFloat(field.Float(), 'f', -1, 64)
+			}
+		case reflect.Bool:
+			value = strconv.FormatBool(field.Bool())
+		case reflect.Struct:
+			if field.Type() == reflect.TypeOf(time.Time{}) {
+				t := field.Interface().(time.Time)
+				if !t.IsZero() {
+					value = t.Format(time.RFC3339)
+				}
+			}
+		case reflect.Ptr:
+			if !field.IsNil() {
+				value = fmt.Sprintf("%v", field.Elem().Interface())
+			}
+		default:
+			slog.Error(fmt.Sprintf("Unsupported type: %v", field.Kind()))
+		}
+		values.Set(tag, value)
+	}
+
+	return values
 }
