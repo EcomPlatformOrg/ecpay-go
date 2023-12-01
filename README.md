@@ -1,4 +1,4 @@
-# ECpay-go
+# ecpay-go
 
 ## 綠界SDK - Golang
 
