@@ -2,9 +2,9 @@ package helpers
 
 import (
 	"crypto/sha256"
-	"ecpay-go/pkg/client"
 	"encoding/hex"
 	"fmt"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/goccy/go-reflect"
 	"io"
 	"log/slog"

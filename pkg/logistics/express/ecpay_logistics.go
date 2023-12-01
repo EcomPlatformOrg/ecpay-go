@@ -1,10 +1,10 @@
 package logistics
 
 import (
-	"ecpay-go/pkg/client"
-	"ecpay-go/pkg/helpers"
-	"ecpay-go/pkg/model"
 	"encoding/json"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
 )
 
 // ECPayLogistics is a struct containing information for an ECPay logistics

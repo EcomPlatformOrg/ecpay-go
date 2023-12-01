@@ -1,9 +1,9 @@
 package trade
 
 import (
-	"ecpay-go/pkg/client"
-	"ecpay-go/pkg/helpers"
-	"ecpay-go/pkg/model"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
 )
 
 // ECPayTrade is a struct containing information for an ECPay trade

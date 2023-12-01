@@ -1,8 +1,8 @@
 package validation
 
 import (
-	"ecpay-go/pkg/helpers"
 	"errors"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
 	"net/url"
 )
 
