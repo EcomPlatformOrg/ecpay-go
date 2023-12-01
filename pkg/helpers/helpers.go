@@ -2,10 +2,13 @@ package helpers
 
 import (
 	"crypto/sha256"
+	"ecpay-go/pkg/client"
 	"encoding/hex"
 	"fmt"
 	"github.com/goccy/go-reflect"
+	"io"
 	"log/slog"
+	"net/http"
 	"net/url"
 	"sort"
 	"strconv"
@@ -110,4 +113,25 @@ func GenerateCheckMacValue(values url.Values, hashKey string, hashIV string) str
 	// Step (6) 再轉大寫產生CheckMacValue
 	slog.Info(fmt.Sprintf("Step (6) CheckMacValue: %v", strings.ToUpper(hashedValue)))
 	return strings.ToUpper(hashedValue)
+}
+
+func SendFormData(c client.ECPayClient, formData url.Values) ([]byte, error) {
+
+	resp, err := http.PostForm(c.BaseURL, formData)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
+		return nil, fmt.Errorf("error sending POST request: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		if err = Body.Close(); err != nil {
+			slog.Error(fmt.Sprintf("Error closing response body: %v", err))
+		}
+	}(resp.Body)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+
+	return body, nil
 }

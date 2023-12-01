@@ -1,4 +1,4 @@
-module github.com/EcomPlatformOrg/ECpay-go
+module ecpay-go
 
 go 1.21
 

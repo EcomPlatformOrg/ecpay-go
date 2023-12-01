@@ -1,12 +1,8 @@
 package trade
 
 import (
-	"fmt"
-	"github.com/EcomPlatformOrg/ECpay-go/pkg/client"
-	"github.com/EcomPlatformOrg/ECpay-go/pkg/helpers"
-	"io"
-	"log/slog"
-	"net/http"
+	"ecpay-go/pkg/client"
+	"ecpay-go/pkg/helpers"
 )
 
 // ECPayTrade is a struct containing information for an ECPay trade
@@ -90,31 +86,18 @@ type ECPayTrade struct {
 // CreateAioPayment sends an HTTP POST request to create a payment transaction with AioPayment method.
 // It takes an ECPayClient as a parameter and returns the response body as a string and an error, if any.
 // If an error occurs during the request, it will be returned.
-func (e *ECPayTrade) CreateAioPayment(client client.ECPayClient) (string, error) {
+func (e *ECPayTrade) CreateAioPayment(c client.ECPayClient) (string, error) {
 
 	formData := helpers.ReflectFormValues(e)
 
-	checkMacValue := helpers.GenerateCheckMacValue(formData, client.HashKey, client.HashIV)
+	checkMacValue := helpers.GenerateCheckMacValue(formData, c.HashKey, c.HashIV)
 
 	formData.Set("CheckMacValue", checkMacValue)
 
-	// 發送 HTTP POST 請求
-	resp, err := http.PostForm(client.BaseURL, formData)
-	if err != nil {
-		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
-		return "", err
-	}
-
-	body, err := io.ReadAll(resp.Body)
+	body, err := helpers.SendFormData(c, formData)
 	if err != nil {
 		return "", err
 	}
-
-	defer func(Body io.ReadCloser) {
-		if err = Body.Close(); err != nil {
-			slog.Error(err.Error())
-		}
-	}(resp.Body)
 
 	return string(body), nil
 }

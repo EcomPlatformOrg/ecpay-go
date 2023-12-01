@@ -1,13 +1,9 @@
 package logistics
 
 import (
+	"ecpay-go/pkg/client"
+	"ecpay-go/pkg/helpers"
 	"encoding/json"
-	"fmt"
-	"github.com/EcomPlatformOrg/ECpay-go/pkg/client"
-	"github.com/EcomPlatformOrg/ECpay-go/pkg/helpers"
-	"io"
-	"log/slog"
-	"net/http"
 )
 
 // ECPayLogistics is a struct containing information for an ECPay logistics
@@ -103,11 +99,26 @@ type ECPayLogistics struct {
 	// CVSPaymentNo 寄貨編號
 	CVSPaymentNo string `json:"CVSPaymentNo,omitempty" form:"CVSPaymentNo"`
 
+	// CVSStoreID 寄貨門市代號
+	CVSStoreID string `json:"CVSStoreID,omitempty" form:"CVSStoreID"`
+
+	// CVSStoreName 寄貨門市名稱
+	CVSStoreName string `json:"CVSStoreName,omitempty" form:"CVSStoreName"`
+
+	// CVSAddress 寄貨門市地址
+	CVSAddress string `json:"CVSAddress,omitempty" form:"CVSAddress"`
+
+	// CVSOutSide 寄貨門市是否為外縣市
+	CVSOutSide string `json:"CVSOutSide,omitempty" form:"CVSOutSide"`
+
 	// CVSValidationNo 驗證碼
 	CVSValidationNo string `json:"CVSValidationNo,omitempty" form:"CVSValidationNo"`
 
 	// BookingNote 托運單號
 	BookingNote string `json:"BookingNote,omitempty" form:"BookingNote"`
+
+	// ExtraData 額外資訊
+	ExtraData string `json:"ExtraData,omitempty" form:"ExtraData"`
 }
 
 // Map is a function that maps the ECPayLogistics struct to the ECPayClient struct
@@ -115,23 +126,10 @@ func (e *ECPayLogistics) Map(c client.ECPayClient) (string, error) {
 
 	formData := helpers.ReflectFormValues(e)
 
-	// 發送 HTTP POST 請求
-	resp, err := http.PostForm(c.BaseURL, formData)
-	if err != nil {
-		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
-		return "", err
-	}
-
-	body, err := io.ReadAll(resp.Body)
+	body, err := helpers.SendFormData(c, formData)
 	if err != nil {
 		return "", err
 	}
-
-	defer func(Body io.ReadCloser) {
-		if err = Body.Close(); err != nil {
-			slog.Error(err.Error())
-		}
-	}(resp.Body)
 
 	return string(body), nil
 }
@@ -144,18 +142,7 @@ func (e *ECPayLogistics) CreateExpress(c client.ECPayClient) error {
 	checkMacValue := helpers.GenerateCheckMacValue(formData, c.HashKey, c.HashIV)
 	formData.Set("CheckMacValue", checkMacValue)
 
-	resp, err := http.PostForm(c.BaseURL, formData)
-	if err != nil {
-		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
-		return err
-	}
-	defer func(Body io.ReadCloser) {
-		if err = Body.Close(); err != nil {
-			slog.Error(fmt.Sprintf("Error closing response body: %v", err))
-		}
-	}(resp.Body)
-
-	body, err := io.ReadAll(resp.Body)
+	body, err := helpers.SendFormData(c, formData)
 	if err != nil {
 		return err
 	}
