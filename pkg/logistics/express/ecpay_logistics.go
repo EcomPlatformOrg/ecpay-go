@@ -3,6 +3,7 @@ package logistics
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
@@ -123,12 +124,14 @@ func (e *ECPayLogistics) CreateTestData(c client.ECPayClient) (*ECPayLogistics, 
 
 	jsonBytes, err := json.Marshal(e)
 	if err != nil {
+		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
 		return nil, err
 	}
 
 	jsonString := string(jsonBytes)
 	encryptedData, err := helpers.EncryptData(jsonString, c.HashKey, c.HashIV)
 	if err != nil {
+		slog.Error(fmt.Sprintf("Error encrypting data: %v", err))
 		return nil, err
 	}
 
@@ -139,11 +142,13 @@ func (e *ECPayLogistics) CreateTestData(c client.ECPayClient) (*ECPayLogistics, 
 
 	jsonData, err := json.Marshal(e)
 	if err != nil {
+		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
 		return nil, err
 	}
 
 	resp, err := http.Post(c.BaseURL, "application/json", strings.NewReader(string(jsonData)))
 	if err != nil {
+		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
 		return nil, err
 	}
 
@@ -155,12 +160,14 @@ func (e *ECPayLogistics) CreateTestData(c client.ECPayClient) (*ECPayLogistics, 
 
 	responseData := ECPayLogistics{}
 	if err = json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
+		slog.Error(fmt.Sprintf("Error decoding response body: %v", err))
 		return nil, err
 	}
 
 	decryptedData := &ECPayLogistics{}
 	decryptedDataString, err := helpers.DecryptData(responseData.Data, c.HashKey, c.HashIV)
 	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&decryptedData); err != nil {
+		slog.Error(fmt.Sprintf("Error decoding decrypted data: %v", err))
 		return nil, err
 	}
 
