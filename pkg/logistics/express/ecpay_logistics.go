@@ -163,8 +163,9 @@ func (e *ECPayLogistics) CreateTestData(c client.ECPayClient) (*ECPayLogistics, 
 		slog.Error(fmt.Sprintf("Error decoding response body: %v", err))
 		return nil, err
 	}
+	slog.Info(fmt.Sprintf("responseData: %+v", responseData))
 
-	slog.Info(fmt.Sprintf("responseData: %+v", responseData.Data))
+	slog.Info(fmt.Sprintf("Data: %+v", responseData.Data))
 	decryptedData := &ECPayLogistics{}
 	decryptedDataString, err := helpers.DecryptData(responseData.Data, c.HashKey, c.HashIV)
 	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&decryptedData); err != nil {
