@@ -55,7 +55,7 @@ type ECPayLogistics struct {
 	ExtraData string `json:"ExtraData,omitempty" form:"ExtraData"`
 
 	// RtnCode 目前物流狀態
-	RtnCode string `json:"RtnCode,omitempty" form:"RtnCode"`
+	RtnCode int `json:"RtnCode,omitempty" form:"RtnCode"`
 
 	// RtnMsg 物流狀態說明
 	RtnMsg string `json:"RtnMsg,omitempty" form:"RtnMsg"`
