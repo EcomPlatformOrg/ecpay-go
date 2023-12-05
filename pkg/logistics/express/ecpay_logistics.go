@@ -1,10 +1,17 @@
 package logistics
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
+	"io"
+	"log/slog"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // ECPayLogistics is a struct containing information for an ECPay logistics
@@ -21,6 +28,9 @@ type ECPayLogistics struct {
 
 	// IsCollection 是否代收貨款
 	IsCollection string `json:"IsCollection,omitempty" form:"IsCollection"`
+
+	// ServiceType 服務型態 固定帶4
+	ServiceType string `json:"ServiceType,omitempty" form:"ServiceType"`
 
 	// ReturnStoreID 退貨門市代號
 	ReturnStoreID string `json:"ReturnStoreID,omitempty" form:"ReturnStoreID"`
@@ -48,6 +58,12 @@ type ECPayLogistics struct {
 
 	// RtnMsg 物流狀態說明
 	RtnMsg string `json:"RtnMsg,omitempty" form:"RtnMsg"`
+
+	// RqHeader
+	RqHeader model.RqHeader `json:",inline"`
+
+	// Data
+	Data string `json:"Data"`
 
 	// BaseModel 通用參數
 	BaseModel model.BaseModel `json:",inline"`
@@ -100,4 +116,53 @@ func (e *ECPayLogistics) CreateExpress(c client.ECPayClient) error {
 
 	return nil
 
+}
+
+// CreateTestData is a method that creates test data for the ECPayLogistics struct and sends it to the ECPayClient server for processing and decryption. The method returns the decrypted
+func (e *ECPayLogistics) CreateTestData(c client.ECPayClient) (*ECPayLogistics, error) {
+
+	jsonBytes, err := json.Marshal(e)
+	if err != nil {
+		return nil, err
+	}
+
+	jsonString := string(jsonBytes)
+	encryptedData, err := helpers.EncryptData(jsonString, c.HashKey, c.HashIV)
+	if err != nil {
+		return nil, err
+	}
+
+	e.Data = encryptedData
+	e.RqHeader = model.RqHeader{
+		Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
+	}
+
+	jsonData, err := json.Marshal(e)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Post(c.BaseURL, "application/json", strings.NewReader(string(jsonData)))
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		if err = Body.Close(); err != nil {
+			slog.Error(err.Error())
+		}
+	}(resp.Body)
+
+	responseData := ECPayLogistics{}
+	if err = json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
+		return nil, err
+	}
+
+	decryptedData := &ECPayLogistics{}
+	decryptedDataString, err := helpers.DecryptData(responseData.Data, c.HashKey, c.HashIV)
+	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&decryptedData); err != nil {
+		return nil, err
+	}
+
+	return decryptedData, nil
 }

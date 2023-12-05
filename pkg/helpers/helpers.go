@@ -1,8 +1,12 @@
 package helpers
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/goccy/go-reflect"
@@ -70,6 +74,74 @@ func ReflectFormValues(data any) url.Values {
 	}
 
 	return values
+}
+
+// EncryptData 使用 ECPay 的加密方式對數據進行加密
+func EncryptData(data string, hashKey string, hashIV string) (string, error) {
+	// URL 編碼
+	urlEncodedData := url.QueryEscape(data)
+
+	// 創建加密器
+	block, err := aes.NewCipher([]byte(hashKey))
+	if err != nil {
+		return "", err
+	}
+
+	// PKCS7 Padding
+	blockSize := block.BlockSize()
+	padding := blockSize - len(urlEncodedData)%blockSize
+	text := strings.Repeat(string(rune(padding)), padding)
+	urlEncodedData += text
+
+	// 初始化向量 IV
+	iv := []byte(hashIV)
+
+	// 加密
+	ciphertext := make([]byte, len(urlEncodedData))
+	mode := cipher.NewCBCEncrypter(block, iv)
+	mode.CryptBlocks(ciphertext, []byte(urlEncodedData))
+
+	// Base64 編碼
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
+}
+
+func DecryptData(encryptData, hashKey, hashIV string) (string, error) {
+	// 將 Base64 字符串解碼為原始加密數據
+	encryptedData, err := base64.StdEncoding.DecodeString(encryptData)
+	if err != nil {
+		return "", err
+	}
+
+	// 根據給定的密鑰創建 cipher.Block
+	block, err := aes.NewCipher([]byte(hashKey))
+	if err != nil {
+		return "", err
+	}
+
+	// 檢查加密數據的長度是否合法
+	if len(encryptedData) < aes.BlockSize {
+		return "", errors.New("ciphertext too short")
+	}
+
+	// 使用 CBC 模式解密數據
+	mode := cipher.NewCBCDecrypter(block, []byte(hashIV))
+	decryptedData := make([]byte, len(encryptedData))
+	mode.CryptBlocks(decryptedData, encryptedData)
+
+	// 移除 PKCS7 填充
+	padding := int(decryptedData[len(decryptedData)-1])
+	if padding < 1 || padding > aes.BlockSize || padding > len(decryptedData) {
+		return "", errors.New("invalid padding")
+	}
+	decryptedData = decryptedData[:len(decryptedData)-padding]
+
+	// URL 解碼
+	result, err := url.QueryUnescape(string(decryptedData))
+	if err != nil {
+		return "", err
+	}
+
+	return result, nil
 }
 
 // GenerateCheckMacValue generates CheckMacValue

@@ -83,3 +83,7 @@ type Receiver struct {
 	// ReceiverAddress 收件人地址
 	ReceiverAddress string `json:"ReceiverAddress,omitempty" form:"ReceiverAddress"`
 }
+
+type RqHeader struct {
+	Timestamp string `json:"Timestamp"`
+}
