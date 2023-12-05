@@ -61,28 +61,28 @@ type ECPayLogistics struct {
 	RtnMsg string `json:"RtnMsg,omitempty" form:"RtnMsg"`
 
 	// RqHeader
-	RqHeader model.RqHeader `json:",inline"`
+	RqHeader model.RqHeader `json:"RqHeader"`
 
 	// Data
 	Data string `json:"Data"`
 
 	// BaseModel 通用參數
-	BaseModel model.BaseModel `json:",inline"`
+	model.BaseModel `json:",inline"`
 
 	// GoodsAmount 商品金額
-	Merchant model.Merchant `json:",inline"`
+	model.Merchant `json:",inline"`
 
 	// Goods 商品資訊
-	Goods model.Goods `json:",inline"`
+	model.Goods `json:",inline"`
 
 	// Sender 寄件人資訊
-	Sender model.Sender `json:",inline"`
+	model.Sender `json:",inline"`
 
 	// Receiver 收件人資訊
-	Receiver model.Receiver `json:",inline"`
+	model.Receiver `json:",inline"`
 
 	// ConvenienceStore 超商取貨相關資訊
-	ConvenienceStore model.ConvenienceStore `json:",inline"`
+	model.ConvenienceStore `json:",inline"`
 }
 
 // Map is a function that maps the ECPayLogistics struct to the ECPayClient struct

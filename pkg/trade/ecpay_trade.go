@@ -10,10 +10,10 @@ import (
 type ECPayTrade struct {
 
 	// BaseModel 通用參數
-	BaseModel model.BaseModel `json:",inline"`
+	model.BaseModel `json:",inline"`
 
 	// Merchant 特店資訊
-	Merchant model.Merchant `json:",inline"`
+	model.Merchant `json:",inline"`
 
 	// PaymentType 交易類型, 固定為 'aio'
 	PaymentType string `json:"PaymentType,omitempty" form:"PaymentType"`
