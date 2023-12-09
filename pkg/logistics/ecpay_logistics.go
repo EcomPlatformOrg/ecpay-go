@@ -62,6 +62,10 @@ type ECPayLogistics struct {
 	// RtnMsg 物流狀態說明
 	RtnMsg string `json:"RtnMsg,omitempty" form:"RtnMsg"`
 
+	// ScheduledPickupTime 預定取件時段
+	ScheduledPickupTime string `json:"ScheduledPickupTime,omitempty" json:"ScheduledPickupTime"`
+
+	// EnableSelectDeliveryTime 是否允許選擇送達時間
 	EnableSelectDeliveryTime string `json:"EnableSelectDeliveryTime,omitempty" form:"EnableSelectDeliveryTime"`
 
 	// RqHeader
