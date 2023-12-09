@@ -26,6 +26,12 @@ type ECPayLogistics struct {
 	// IsCollection 是否代收貨款
 	IsCollection string `json:"IsCollection,omitempty" form:"IsCollection"`
 
+	// Temperature 溫層
+	Temperature string `json:"Temperature,omitempty" form:"Temperature"`
+
+	// Specification 規格
+	Specification string `json:"Specification,omitempty" form:"Specification"`
+
 	// ServiceType 服務型態 固定帶4
 	ServiceType string `json:"ServiceType,omitempty" form:"ServiceType"`
 
@@ -55,6 +61,8 @@ type ECPayLogistics struct {
 
 	// RtnMsg 物流狀態說明
 	RtnMsg string `json:"RtnMsg,omitempty" form:"RtnMsg"`
+
+	EnableSelectDeliveryTime string `json:"EnableSelectDeliveryTime,omitempty" form:"EnableSelectDeliveryTime"`
 
 	// RqHeader
 	RqHeader model.RqHeader `json:"RqHeader"`
