@@ -187,7 +187,7 @@ func GenerateCheckMacValue(values url.Values, hashKey string, hashIV string) str
 	return strings.ToUpper(hashedValue)
 }
 
-func SendFormData(c client.ECPayClient, formData url.Values) ([]byte, error) {
+func SendFormData(c *client.ECPayClient, formData url.Values) ([]byte, error) {
 
 	resp, err := http.PostForm(c.BaseURL, formData)
 	if err != nil {

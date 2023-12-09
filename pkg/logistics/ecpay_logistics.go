@@ -1,22 +1,18 @@
 package logistics
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
-	"io"
 	"log/slog"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
 // ECPayLogistics is a struct containing information for an ECPay logistics
 type ECPayLogistics struct {
+
+	// TempLogisticsID 物流交易編號
+	TempLogisticsID string `json:"TempLogisticsID,omitempty" form:"TempLogisticsID"`
 
 	// LogisticsType 物流類型
 	LogisticsType string `json:"LogisticsType,omitempty" form:"LogisticsType"`
@@ -86,11 +82,11 @@ type ECPayLogistics struct {
 }
 
 // Map is a function that maps the ECPayLogistics struct to the ECPayClient struct
-func (e *ECPayLogistics) Map(c client.ECPayClient) (string, error) {
+func (e *ECPayLogistics) Map() (string, error) {
 
 	formData := helpers.ReflectFormValues(e)
 
-	body, err := helpers.SendFormData(c, formData)
+	body, err := helpers.SendFormData(e.Client, formData)
 	if err != nil {
 		return "", err
 	}
@@ -99,14 +95,14 @@ func (e *ECPayLogistics) Map(c client.ECPayClient) (string, error) {
 }
 
 // CreateExpress 綠界物流門市訂單建立
-func (e *ECPayLogistics) CreateExpress(c client.ECPayClient) error {
+func (e *ECPayLogistics) CreateExpress() error {
 
 	formData := helpers.ReflectFormValues(e)
 
-	checkMacValue := helpers.GenerateCheckMacValue(formData, c.HashKey, c.HashIV)
+	checkMacValue := helpers.GenerateCheckMacValue(formData, e.Client.HashKey, e.Client.HashIV)
 	formData.Set("CheckMacValue", checkMacValue)
 
-	body, err := helpers.SendFormData(c, formData)
+	body, err := helpers.SendFormData(e.Client, formData)
 	if err != nil {
 		return err
 	}
@@ -116,62 +112,25 @@ func (e *ECPayLogistics) CreateExpress(c client.ECPayClient) error {
 	}
 
 	return nil
-
 }
 
-// CreateTestData is a method that creates test data for the ECPayLogistics struct and sends it to the ECPayClient server for processing and decryption. The method returns the decrypted
-func (e *ECPayLogistics) CreateTestData(c client.ECPayClient) (*ECPayLogistics, error) {
+// EncryptLogistics is a method that encrypts the ECPayLogistics struct using the helpers.EncryptData function and sets the encrypted data to the "Data" field of the struct.
+// It takes no arguments and returns an error if there was an error marshalling the struct or encrypting the data, otherwise it returns nil.
+func (e *ECPayLogistics) EncryptLogistics() error {
 
 	jsonBytes, err := json.Marshal(e)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
-		return nil, err
+		return err
 	}
 
 	jsonString := string(jsonBytes)
-	encryptedData, err := helpers.EncryptData(jsonString, c.HashKey, c.HashIV)
+	encryptedData, err := helpers.EncryptData(jsonString, e.Client.HashKey, e.Client.HashIV)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error encrypting data: %v", err))
-		return nil, err
+		return err
 	}
 
 	e.Data = encryptedData
-	e.RqHeader = model.RqHeader{
-		Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
-	}
-
-	jsonData, err := json.Marshal(e)
-	if err != nil {
-		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
-		return nil, err
-	}
-
-	resp, err := http.Post(c.BaseURL, "application/json", strings.NewReader(string(jsonData)))
-	if err != nil {
-		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
-		return nil, err
-	}
-
-	defer func(Body io.ReadCloser) {
-		if err = Body.Close(); err != nil {
-			slog.Error(err.Error())
-		}
-	}(resp.Body)
-
-	responseData := ECPayLogistics{}
-	if err = json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
-		slog.Error(fmt.Sprintf("Error decoding response body: %v", err))
-		return nil, err
-	}
-	slog.Info(fmt.Sprintf("responseData: %+v", responseData))
-
-	slog.Info(fmt.Sprintf("Data: %+v", responseData.Data))
-	decryptedData := &ECPayLogistics{}
-	decryptedDataString, err := helpers.DecryptData(responseData.Data, c.HashKey, c.HashIV)
-	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&decryptedData); err != nil {
-		slog.Error(fmt.Sprintf("Error decoding decrypted data: %v", err))
-		return nil, err
-	}
-
-	return decryptedData, nil
+	return nil
 }

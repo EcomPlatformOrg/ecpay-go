@@ -1,7 +1,6 @@
 package trade
 
 import (
-	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
 )
@@ -73,15 +72,15 @@ type ECPayTrade struct {
 // CreateAioPayment sends an HTTP POST request to create a payment transaction with AioPayment method.
 // It takes an ECPayClient as a parameter and returns the response body as a string and an error, if any.
 // If an error occurs during the request, it will be returned.
-func (e *ECPayTrade) CreateAioPayment(c client.ECPayClient) (string, error) {
+func (e *ECPayTrade) CreateAioPayment() (string, error) {
 
 	formData := helpers.ReflectFormValues(e)
 
-	checkMacValue := helpers.GenerateCheckMacValue(formData, c.HashKey, c.HashIV)
+	checkMacValue := helpers.GenerateCheckMacValue(formData, e.Client.HashKey, e.Client.HashIV)
 
 	formData.Set("CheckMacValue", checkMacValue)
 
-	body, err := helpers.SendFormData(c, formData)
+	body, err := helpers.SendFormData(e.Client, formData)
 	if err != nil {
 		return "", err
 	}

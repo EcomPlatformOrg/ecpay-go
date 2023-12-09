@@ -1,6 +1,10 @@
 package model
 
+import "github.com/EcomPlatformOrg/ecpay-go/pkg/client"
+
 type BaseModel struct {
+	Client *client.ECPayClient `json:"-" form:"-"`
+
 	// TradeDesc 交易描述
 	TradeDesc string `json:"TradeDesc,omitempty" form:"TradeDesc"`
 
