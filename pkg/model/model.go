@@ -66,6 +66,9 @@ type Sender struct {
 
 	// SenderCellPhone 寄件人手機
 	SenderCellPhone string `json:"SenderCellPhone,omitempty" form:"SenderCellPhone"`
+
+	// SenderZipCode 寄件人郵遞區號
+	SenderZipCode string `json:"SenderZipCode,omitempty" form:"SenderZipCode"`
 }
 
 type Receiver struct {
