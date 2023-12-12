@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
 	"io"
@@ -198,7 +199,14 @@ func (e *ECPayLogistics) RedirectToLogisticsSelection() (*ECPayLogistics, error)
 		}
 	}(resp.Body)
 
-	responseData := &ECPayLogistics{}
+	responseData := &ECPayLogistics{
+		BaseModel: model.BaseModel{
+			Client: &client.ECPayClient{
+				HashKey: e.Client.HashKey,
+				HashIV:  e.Client.HashIV,
+			},
+		},
+	}
 	if err = responseData.DecryptLogistics(resp.Body); err != nil {
 		return nil, err
 	}
