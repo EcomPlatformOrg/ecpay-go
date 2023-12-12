@@ -58,39 +58,3 @@ func (e *ECPayLogistics) CreateTestData() (*ECPayLogistics, error) {
 
 	return decryptedData, nil
 }
-
-func (e *ECPayLogistics) RedirectToLogisticsSelection() (string, error) {
-
-	if err := e.EncryptLogistics(); err != nil {
-		return "", err
-	}
-
-	e.RqHeader = model.RqHeader{
-		Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
-	}
-
-	jsonData, err := json.Marshal(e)
-	if err != nil {
-		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
-		return "", err
-	}
-
-	resp, err := http.Post(e.Client.BaseURL, "application/json", strings.NewReader(string(jsonData)))
-	if err != nil {
-		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
-		return "", err
-	}
-
-	defer func(Body io.ReadCloser) {
-		if err = Body.Close(); err != nil {
-			slog.Error(err.Error())
-		}
-	}(resp.Body)
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("error reading response body: %w", err)
-	}
-
-	return string(body), nil
-}

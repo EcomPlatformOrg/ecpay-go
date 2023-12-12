@@ -81,8 +81,6 @@ func EncryptData(data string, hashKey string, hashIV string) (string, error) {
 	// URL 編碼
 	urlEncodedData := url.QueryEscape(data)
 
-	slog.Info(fmt.Sprintf("UrlEncodedData : %s", urlEncodedData))
-	// 創建加密器
 	block, err := aes.NewCipher([]byte(hashKey))
 	if err != nil {
 		return "", err

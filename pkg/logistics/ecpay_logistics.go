@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
+	"io"
 	"log/slog"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // ECPayLogistics is a struct containing information for an ECPay logistics
@@ -145,4 +150,46 @@ func (e *ECPayLogistics) EncryptLogistics() error {
 
 	e.Data = encryptedData
 	return nil
+}
+
+func (e *ECPayLogistics) RedirectToLogisticsSelection() (*ECPayLogistics, error) {
+
+	if err := e.EncryptLogistics(); err != nil {
+		return nil, err
+	}
+
+	e.RqHeader = model.RqHeader{
+		Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
+	}
+
+	jsonData, err := json.Marshal(e)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
+		return nil, err
+	}
+
+	resp, err := http.Post(e.Client.BaseURL, "application/json", strings.NewReader(string(jsonData)))
+	if err != nil {
+		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		if err = Body.Close(); err != nil {
+			slog.Error(err.Error())
+		}
+	}(resp.Body)
+
+	body, err := io.ReadAll(resp.Body)
+
+	data := &ECPayLogistics{}
+	if err = json.Unmarshal(body, &data); err != nil {
+		return nil, err
+	}
+
+	if err = data.EncryptLogistics(); err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
