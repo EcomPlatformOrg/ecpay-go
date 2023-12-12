@@ -161,9 +161,8 @@ func (e *ECPayLogistics) DecryptLogistics(body io.ReadCloser) error {
 		return err
 	}
 
-	decryptedData := &ECPayLogistics{}
 	decryptedDataString, err := helpers.DecryptData(e.Data, e.Client.HashKey, e.Client.HashIV)
-	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&decryptedData); err != nil {
+	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&e); err != nil {
 		slog.Error(fmt.Sprintf("Error decoding decrypted data: %v", err))
 		return err
 	}
