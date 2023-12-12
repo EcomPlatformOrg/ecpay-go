@@ -27,6 +27,9 @@ type ECPayLogistics struct {
 	// LogisticsSubType 物流子類型
 	LogisticsSubType string `json:"LogisticsSubType,omitempty" form:"LogisticsSubType"`
 
+	// LogisticsSubType 物流子類型
+	LogisticsSelection string `json:"LogisticsURL,omitempty"`
+
 	// CollectionAmount 代收金額
 	CollectionAmount int `json:"CollectionAmount,omitempty" form:"CollectionAmount"`
 
@@ -170,10 +173,10 @@ func (e *ECPayLogistics) DecryptLogistics(body io.ReadCloser) error {
 	return nil
 }
 
-func (e *ECPayLogistics) RedirectToLogisticsSelection() (*ECPayLogistics, error) {
+func (e *ECPayLogistics) RedirectToLogisticsSelection() (string, error) {
 
 	if err := e.EncryptLogistics(); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	e.RqHeader = model.RqHeader{
@@ -183,13 +186,13 @@ func (e *ECPayLogistics) RedirectToLogisticsSelection() (*ECPayLogistics, error)
 	jsonData, err := json.Marshal(e)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
-		return nil, err
+		return "", err
 	}
 
 	resp, err := http.Post(e.Client.BaseURL, "application/json", strings.NewReader(string(jsonData)))
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
-		return nil, err
+		return "", err
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -206,9 +209,11 @@ func (e *ECPayLogistics) RedirectToLogisticsSelection() (*ECPayLogistics, error)
 			},
 		},
 	}
+
 	if err = responseData.DecryptLogistics(resp.Body); err != nil {
-		return nil, err
+		body, _ := io.ReadAll(resp.Body)
+		return string(body), err
 	}
 
-	return responseData, nil
+	return responseData.RtnMsg, nil
 }
