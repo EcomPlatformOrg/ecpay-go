@@ -69,6 +69,9 @@ type Sender struct {
 
 	// SenderZipCode 寄件人郵遞區號
 	SenderZipCode string `json:"SenderZipCode,omitempty" form:"SenderZipCode"`
+
+	// SenderAddress 寄件人地址
+	SenderAddress string `json:"SenderAddress,omitempty" form:"SenderAddress"`
 }
 
 type Receiver struct {
