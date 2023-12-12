@@ -1,6 +1,7 @@
 package logistics
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
@@ -152,6 +153,23 @@ func (e *ECPayLogistics) EncryptLogistics() error {
 	return nil
 }
 
+func (e *ECPayLogistics) DecryptLogistics(body io.ReadCloser) error {
+
+	if err := json.NewDecoder(body).Decode(&e); err != nil {
+		slog.Error(fmt.Sprintf("Error decoding response body: %v", err))
+		return err
+	}
+
+	decryptedData := &ECPayLogistics{}
+	decryptedDataString, err := helpers.DecryptData(e.Data, e.Client.HashKey, e.Client.HashIV)
+	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&decryptedData); err != nil {
+		slog.Error(fmt.Sprintf("Error decoding decrypted data: %v", err))
+		return err
+	}
+
+	return nil
+}
+
 func (e *ECPayLogistics) RedirectToLogisticsSelection() (*ECPayLogistics, error) {
 
 	if err := e.EncryptLogistics(); err != nil {
@@ -180,16 +198,10 @@ func (e *ECPayLogistics) RedirectToLogisticsSelection() (*ECPayLogistics, error)
 		}
 	}(resp.Body)
 
-	body, err := io.ReadAll(resp.Body)
-
-	data := &ECPayLogistics{}
-	if err = json.Unmarshal(body, &data); err != nil {
+	responseData := &ECPayLogistics{}
+	if err = responseData.DecryptLogistics(resp.Body); err != nil {
 		return nil, err
 	}
 
-	if err = data.EncryptLogistics(); err != nil {
-		return nil, err
-	}
-
-	return data, nil
+	return responseData, nil
 }
