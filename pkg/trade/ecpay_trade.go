@@ -7,7 +7,7 @@ import (
 
 // ECPayTrade is a struct containing information for an ECPay trade
 type ECPayTrade struct {
-	Client *client.ECPayClient `json:"-" form:"-"`
+	Client *client.ECPayClient `json:"-"`
 
 	// TradeDesc 交易描述
 	TradeDesc string `json:"TradeDesc,omitempty" form:"TradeDesc"`
