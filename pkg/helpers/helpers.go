@@ -21,29 +21,19 @@ import (
 )
 
 func ReflectFormValues(data any) url.Values {
-	values := url.Values{}
-	reflectStruct(reflect.ValueOf(data), &values)
-	return values
-}
 
-func reflectStruct(v reflect.Value, values *url.Values) {
+	values := url.Values{}
+	v := reflect.ValueOf(data)
+
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
 
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
-		fieldType := v.Type().Field(i)
-		tag := fieldType.Tag.Get("form")
+		tag := v.Type().Field(i).Tag.Get("form")
 
-		if tag == "" {
-			if field.Kind() == reflect.Struct && !isTimeStruct(field) {
-				reflectStruct(field, values) // 遞迴處理嵌套結構體
-			}
-			continue
-		}
-
-		if !field.IsValid() || !field.CanInterface() {
+		if tag == "" || !field.IsValid() {
 			continue
 		}
 
@@ -68,7 +58,7 @@ func reflectStruct(v reflect.Value, values *url.Values) {
 		case reflect.Bool:
 			values.Set(tag, strconv.FormatBool(field.Bool()))
 		case reflect.Struct:
-			if isTimeStruct(field) {
+			if field.Type() == reflect.TypeOf(time.Time{}) {
 				t := field.Interface().(time.Time)
 				if !t.IsZero() {
 					values.Set(tag, t.Format(time.RFC3339))
@@ -79,17 +69,11 @@ func reflectStruct(v reflect.Value, values *url.Values) {
 				values.Set(tag, fmt.Sprintf("%v", field.Elem().Interface()))
 			}
 		default:
-			// 處理不支持的類型
-			slog.Error("Unsupported type: %v\n", field.Kind())
+			slog.Error(fmt.Sprintf("Unsupported type: %v", field.Kind()))
 		}
 	}
-}
 
-func isTimeStruct(v reflect.Value) bool {
-	if v.Type().Name() == "Time" && v.Type().PkgPath() == "time" {
-		return true
-	}
-	return false
+	return values
 }
 
 // EncryptData 使用 ECPay 的加密方式對數據進行加密
