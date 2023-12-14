@@ -1,34 +1,18 @@
 package trade
 
 import (
-	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
 )
 
 // ECPayTrade is a struct containing information for an ECPay trade
 type ECPayTrade struct {
-	Client *client.ECPayClient `json:"-"`
 
-	// TradeDesc 交易描述
-	TradeDesc string `json:"TradeDesc,omitempty" form:"TradeDesc"`
+	// BaseModel 通用參數
+	model.BaseModel `json:",inline"`
 
-	// Remark 備註
-	Remark string `json:"Remark,omitempty" form:"Remark"`
-
-	// PlatformID 特約合作平台商代號
-	PlatformID string `json:"PlatformID,omitempty" form:"PlatformID"`
-
-	// CheckMacValue 檢查碼
-	CheckMacValue string `json:"CheckMacValue,omitempty" form:"CheckMacValue"`
-
-	// MerchantID
-	MerchantID string `json:"MerchantID,omitempty" form:"MerchantID"`
-
-	// MerchantTradeNo 特店交易編號
-	MerchantTradeNo string `json:"MerchantTradeNo,omitempty" form:"MerchantTradeNo"`
-
-	// MerchantTradeDate 廠商交易時間
-	MerchantTradeDate string `json:"MerchantTradeDate,omitempty" form:"MerchantTradeDate"`
+	// Merchant 特店資訊
+	model.Merchant `json:",inline"`
 
 	// PaymentType 交易類型, 固定為 'aio'
 	PaymentType string `json:"PaymentType,omitempty" form:"PaymentType"`
