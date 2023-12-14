@@ -84,6 +84,9 @@ type ECPayLogistics struct {
 	// Data
 	Data string `json:"Data"`
 
+	// ResultData
+	ResultData string `json:"ResultData"`
+
 	// BaseModel 通用參數
 	model.BaseModel `json:",inline"`
 
