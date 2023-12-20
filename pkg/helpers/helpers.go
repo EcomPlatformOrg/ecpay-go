@@ -169,7 +169,6 @@ func GenerateCheckMacValue(values url.Values, hashKey string, hashIV string) str
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
-	slog.Info(fmt.Sprintf("keys: %v", keys))
 
 	var sortedQueryString string
 	for _, key := range keys {
@@ -177,28 +176,22 @@ func GenerateCheckMacValue(values url.Values, hashKey string, hashIV string) str
 	}
 	// remove trailing '&'
 	sortedQueryString = strings.TrimSuffix(sortedQueryString, "&")
-	slog.Info(fmt.Sprintf("sortedQueryString: %v", sortedQueryString))
 
 	// Step (2) 參數最前面加上HashKey、最後面加上HashIV
 	encodedString := "HashKey=" + hashKey + "&" + sortedQueryString + "&HashIV=" + hashIV
-	slog.Info(fmt.Sprintf("Step (2) encodedString: %v", encodedString))
 
 	// Step (3) 將整串字串進行URL encode
 	encodedString = url.QueryEscape(encodedString)
-	slog.Info(fmt.Sprintf("Step (3) encodedString: %v", encodedString))
 
 	// Step (4) 轉為小寫
 	encodedString = strings.ToLower(encodedString)
-	slog.Info(fmt.Sprintf("Step (4) encodedString: %v", encodedString))
 
 	// Step (5) 以SHA256加密方式來產生雜凑值
 	hasher := sha256.New()
 	hasher.Write([]byte(encodedString))
 	hashedValue := hex.EncodeToString(hasher.Sum(nil))
-	slog.Info(fmt.Sprintf("Step (5) hashedValue: %v", hashedValue))
 
 	// Step (6) 再轉大寫產生CheckMacValue
-	slog.Info(fmt.Sprintf("Step (6) CheckMacValue: %v", strings.ToUpper(hashedValue)))
 	return strings.ToUpper(hashedValue)
 }
 
@@ -206,7 +199,6 @@ func SendFormData(c *client.ECPayClient, formData url.Values) ([]byte, error) {
 
 	resp, err := http.PostForm(c.BaseURL, formData)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
 		return nil, fmt.Errorf("error sending POST request: %w", err)
 	}
 	defer func(Body io.ReadCloser) {

@@ -160,9 +160,9 @@ func (e *ECPayLogistics) EncryptLogistics() error {
 	return nil
 }
 
-func (e *ECPayLogistics) DecryptLogistics(body io.ReadCloser) error {
+func (e *ECPayLogistics) DecryptLogistics(body []byte) error {
 
-	if err := json.NewDecoder(body).Decode(&e); err != nil {
+	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&e); err != nil {
 		slog.Error(fmt.Sprintf("Error decoding response body: %v", err))
 		return err
 	}
@@ -213,10 +213,24 @@ func (e *ECPayLogistics) RedirectToLogisticsSelection() (string, error) {
 		},
 	}
 
-	if err = responseData.DecryptLogistics(resp.Body); err != nil {
-		body, _ := io.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
+	if err = responseData.DecryptLogistics(body); err != nil {
 		return string(body), err
 	}
 
 	return responseData.RtnMsg, nil
+}
+
+func (e *ECPayLogistics) UpdateTempTrade() error {
+
+	body, err := json.Marshal(e)
+	if err != nil {
+		return err
+	}
+
+	if err = e.DecryptLogistics(body); err != nil {
+		return err
+	}
+
+	return nil
 }
