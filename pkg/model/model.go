@@ -90,6 +90,9 @@ type Receiver struct {
 	// ReceiverStoreID 收件人門市代號
 	ReceiverStoreID string `json:"ReceiverStoreID,omitempty" form:"ReceiverStoreID"`
 
+	// ReceiverStoreName
+	ReceiverStoreName string `json:"ReceiverStoreName,omitempty"`
+
 	// ReceiverAddress 收件人地址
 	ReceiverAddress string `json:"ReceiverAddress,omitempty" form:"ReceiverAddress"`
 }
