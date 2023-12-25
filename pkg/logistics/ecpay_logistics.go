@@ -85,6 +85,10 @@ type ECPayLogistics struct {
 	// RqHeader
 	RqHeader model.RqHeader `json:"RqHeader"`
 
+	TransCode string `json:"TransCode"`
+
+	TransMsg string `json:"TransMsg"`
+
 	// Data
 	Data string `json:"Data"`
 
@@ -170,6 +174,10 @@ func (e *ECPayLogistics) DecryptLogistics(body []byte) error {
 		slog.Error(fmt.Sprintf("Error decoding response body: %v", err))
 		return err
 	}
+
+	slog.Info(fmt.Sprintf("Body : %s", string(body)))
+	slog.Info(fmt.Sprintf("TransCode : %s", e.TransCode))
+	slog.Info(fmt.Sprintf("TransMsg : %s", e.TransMsg))
 	slog.Info(fmt.Sprintf("Data : %s", e.Data))
 	decryptedDataString, err := helpers.DecryptData(e.Data, e.Client.HashKey, e.Client.HashIV)
 	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&e); err != nil {
