@@ -3,6 +3,7 @@ package logistics
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
@@ -20,6 +21,9 @@ type ECPayLogistics struct {
 
 	// TempLogisticsID 物流交易編號
 	TempLogisticsID string `json:"TempLogisticsID,omitempty" form:"TempLogisticsID"`
+
+	// LogisticsID 綠界物流訂單編號
+	LogisticsID string `json:"LogisticsID,omitempty"`
 
 	// LogisticsType 物流類型
 	LogisticsType string `json:"LogisticsType,omitempty" form:"LogisticsType"`
@@ -223,14 +227,98 @@ func (e *ECPayLogistics) RedirectToLogisticsSelection() (string, error) {
 
 func (e *ECPayLogistics) UpdateTempTrade() error {
 
-	body, err := json.Marshal(e)
-	if err != nil {
+	if err := e.EncryptLogistics(); err != nil {
 		return err
 	}
 
-	if err = e.DecryptLogistics(body); err != nil {
+	e.RqHeader = model.RqHeader{
+		Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
+	}
+
+	jsonData, err := json.Marshal(e)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
 		return err
+	}
+
+	resp, err := http.Post(e.Client.BaseURL, "application/json", strings.NewReader(string(jsonData)))
+	if err != nil {
+		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
+		return err
+	}
+
+	defer func(Body io.ReadCloser) {
+		if err = Body.Close(); err != nil {
+			slog.Error(err.Error())
+		}
+	}(resp.Body)
+
+	responseData := &ECPayLogistics{
+		BaseModel: model.BaseModel{
+			Client: &client.ECPayClient{
+				HashKey: e.Client.HashKey,
+				HashIV:  e.Client.HashIV,
+			},
+		},
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	if err = responseData.DecryptLogistics(body); err != nil {
+		return err
+	}
+
+	if responseData.RtnCode != 1 {
+		return errors.New(fmt.Sprintf("建立暫存物流訂單失敗 失敗原因 : %s", responseData.RtnMsg))
 	}
 
 	return nil
+}
+
+func (e *ECPayLogistics) CreateByTempTrade() (string, error) {
+
+	if err := e.EncryptLogistics(); err != nil {
+		return "", err
+	}
+
+	e.RqHeader = model.RqHeader{
+		Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
+	}
+
+	jsonData, err := json.Marshal(e)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
+		return "", err
+	}
+
+	resp, err := http.Post(e.Client.BaseURL, "application/json", strings.NewReader(string(jsonData)))
+	if err != nil {
+		slog.Error(fmt.Sprintf("Error sending POST request: %v", err))
+		return "", err
+	}
+
+	defer func(Body io.ReadCloser) {
+		if err = Body.Close(); err != nil {
+			slog.Error(err.Error())
+		}
+	}(resp.Body)
+
+	responseData := &ECPayLogistics{
+		BaseModel: model.BaseModel{
+			Client: &client.ECPayClient{
+				HashKey: e.Client.HashKey,
+				HashIV:  e.Client.HashIV,
+			},
+		},
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	if err = responseData.DecryptLogistics(body); err != nil {
+		return "", err
+	}
+
+	if responseData.RtnCode != 1 {
+		return "", errors.New(fmt.Sprintf("建立正式物流訂單失敗 失敗原因 : %s", responseData.RtnMsg))
+	}
+
+	return responseData.LogisticsID, nil
 }
