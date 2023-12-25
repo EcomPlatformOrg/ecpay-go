@@ -170,7 +170,7 @@ func (e *ECPayLogistics) DecryptLogistics(body []byte) error {
 		slog.Error(fmt.Sprintf("Error decoding response body: %v", err))
 		return err
 	}
-
+	slog.Info(fmt.Sprintf("Data : %s", e.Data))
 	decryptedDataString, err := helpers.DecryptData(e.Data, e.Client.HashKey, e.Client.HashIV)
 	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&e); err != nil {
 		slog.Error(fmt.Sprintf("Error decoding decrypted data: %v", err))
