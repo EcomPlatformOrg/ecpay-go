@@ -85,7 +85,7 @@ type ECPayLogistics struct {
 	// RqHeader
 	RqHeader model.RqHeader `json:"RqHeader"`
 
-	TransCode string `json:"TransCode"`
+	TransCode int `json:"TransCode"`
 
 	TransMsg string `json:"TransMsg"`
 
@@ -176,7 +176,7 @@ func (e *ECPayLogistics) DecryptLogistics(body []byte) error {
 	}
 
 	slog.Info(fmt.Sprintf("Body : %s", string(body)))
-	slog.Info(fmt.Sprintf("TransCode : %s", e.TransCode))
+	slog.Info(fmt.Sprintf("TransCode : %d", e.TransCode))
 	slog.Info(fmt.Sprintf("TransMsg : %s", e.TransMsg))
 	slog.Info(fmt.Sprintf("Data : %s", e.Data))
 	decryptedDataString, err := helpers.DecryptData(e.Data, e.Client.HashKey, e.Client.HashIV)
