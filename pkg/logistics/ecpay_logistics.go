@@ -25,6 +25,12 @@ type ECPayLogistics struct {
 	// LogisticsID 綠界物流訂單編號
 	LogisticsID string `json:"LogisticsID,omitempty"`
 
+	// LogisticsStatus 物流狀態
+	LogisticsStatus string `json:"LogisticsStatus,omitempty"`
+
+	// LogisticsStatusName 貨態代碼訊息
+	LogisticsStatusName string `json:"LogisticsStatusName,omitempty"`
+
 	// LogisticsType 物流類型
 	LogisticsType string `json:"LogisticsType,omitempty" form:"LogisticsType"`
 
