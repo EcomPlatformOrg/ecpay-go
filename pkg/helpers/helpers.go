@@ -179,7 +179,7 @@ func GenerateCheckMacValue(values url.Values, hashKey string, hashIV string) str
 
 	// Step (2) 參數最前面加上HashKey、最後面加上HashIV
 	encodedString := "HashKey=" + hashKey + "&" + sortedQueryString + "&HashIV=" + hashIV
-
+	slog.Info(fmt.Sprintf("Step (2) encodedString: %v", encodedString))
 	// Step (3) 將整串字串進行URL encode
 	encodedString = url.QueryEscape(encodedString)
 
