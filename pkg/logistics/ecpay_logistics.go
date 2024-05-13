@@ -282,6 +282,7 @@ func (e *ECPayLogistics) UpdateTempTrade() error {
 	}
 
 	if responseData.RtnCode != 1 {
+		slog.Info(fmt.Sprintf("responseData.RtnCode : %d", responseData.RtnCode))
 		return errors.New(fmt.Sprintf("建立暫存物流訂單失敗 失敗原因 : %s", responseData.RtnMsg))
 	}
 
