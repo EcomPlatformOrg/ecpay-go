@@ -176,6 +176,7 @@ func GenerateCheckMacValue(values url.Values, hashKey string, hashIV string) str
 	}
 	// remove trailing '&'
 	sortedQueryString = strings.TrimSuffix(sortedQueryString, "&")
+	slog.Info(fmt.Sprintf("Step (1) sortedQueryString: %v", sortedQueryString))
 
 	// Step (2) 參數最前面加上HashKey、最後面加上HashIV
 	encodedString := "HashKey=" + hashKey + "&" + sortedQueryString + "&HashIV=" + hashIV
