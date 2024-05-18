@@ -24,6 +24,10 @@ func (e *ECPayLogistics) CreateTestData() (*ECPayLogistics, error) {
 		Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
 	}
 
+	slog.Info(e.Data)
+	slog.Info(e.PlatformID)
+	slog.Info(e.MerchantID)
+	slog.Info(e.Client.BaseURL)
 	jsonData, err := json.Marshal(e)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error marshalling ECPayLogistics struct: %v", err))
