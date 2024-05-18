@@ -49,6 +49,8 @@ func (e *ECPayLogistics) CreateTestData() (*ECPayLogistics, error) {
 		return nil, err
 	}
 
+	slog.Info(fmt.Sprintf("responseData.TransCode %d", responseData.TransCode))
+	slog.Info(fmt.Sprintf("responseData.TransMsg %d", responseData.TransMsg))
 	decryptedData := &ECPayLogistics{}
 	decryptedDataString, err := helpers.DecryptData(responseData.Data, e.Client.HashKey, e.Client.HashIV)
 	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&decryptedData); err != nil {

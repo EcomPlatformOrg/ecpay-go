@@ -338,3 +338,7 @@ func (e *ECPayLogistics) CreateByTempTrade() (string, error) {
 
 	return responseData.LogisticsID, nil
 }
+
+//func (e *ECPayLogistics)CreateTestData() (string, error) {
+//
+//}
