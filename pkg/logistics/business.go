@@ -1,10 +1,9 @@
 package logistics
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/EcomPlatformOrg/ecpay-go/pkg/helpers"
+	"github.com/EcomPlatformOrg/ecpay-go/pkg/client"
 	"github.com/EcomPlatformOrg/ecpay-go/pkg/model"
 	"io"
 	"log/slog"
@@ -43,20 +42,33 @@ func (e *ECPayLogistics) CreateTestData() (*ECPayLogistics, error) {
 		}
 	}(resp.Body)
 
-	responseData := ECPayLogistics{}
-	if err = json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
-		slog.Error(fmt.Sprintf("Error decoding response body: %v", err))
+	//responseData := ECPayLogistics{}
+	//if err = json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
+	//	slog.Error(fmt.Sprintf("Error decoding response body: %v", err))
+	//	return nil, err
+	//}
+	//
+	//slog.Info(fmt.Sprintf("responseData.TransCode %d", responseData.TransCode))
+	//slog.Info(fmt.Sprintf("responseData.TransMsg %s", responseData.TransMsg))
+	//decryptedData := &ECPayLogistics{}
+	//decryptedDataString, err := helpers.DecryptData(responseData.Data, e.Client.HashKey, e.Client.HashIV)
+	//if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&decryptedData); err != nil {
+	//	slog.Error(fmt.Sprintf("Error decoding decrypted data: %v", err))
+	//	return nil, err
+	//}
+	responseData := &ECPayLogistics{
+		BaseModel: model.BaseModel{
+			Client: &client.ECPayClient{
+				HashKey: e.Client.HashKey,
+				HashIV:  e.Client.HashIV,
+			},
+		},
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	if err = responseData.DecryptLogistics(body); err != nil {
 		return nil, err
 	}
 
-	slog.Info(fmt.Sprintf("responseData.TransCode %d", responseData.TransCode))
-	slog.Info(fmt.Sprintf("responseData.TransMsg %s", responseData.TransMsg))
-	decryptedData := &ECPayLogistics{}
-	decryptedDataString, err := helpers.DecryptData(responseData.Data, e.Client.HashKey, e.Client.HashIV)
-	if err = json.NewDecoder(bytes.NewReader([]byte(decryptedDataString))).Decode(&decryptedData); err != nil {
-		slog.Error(fmt.Sprintf("Error decoding decrypted data: %v", err))
-		return nil, err
-	}
-
-	return decryptedData, nil
+	return responseData, nil
 }
